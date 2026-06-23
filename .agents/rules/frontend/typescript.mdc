@@ -1,0 +1,10 @@
+---
+globs: packages/client/*
+alwaysApply: false
+---
+
+# TypeScript Rules
+
+- Use TypeScript strictly.
+- Never use any.
+- Use Zod for validation.

@@ -1,0 +1,20 @@
+---
+alwaysApply: true
+---
+
+# Spec Driven Rules
+
+Before writing code:
+
+1. Read SPEC-000.
+2. Read the target specification.
+3. Explain implementation plan.
+4. Explain files that will be created.
+
+Never implement requirements that are not present in the specification.
+
+If requirements are missing:
+
+Ask questions.
+
+After finishing, mark the specs as Applied

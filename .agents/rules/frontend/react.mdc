@@ -1,0 +1,23 @@
+---
+globs: packages/client/*
+alwaysApply: false
+---
+
+# React Rules
+
+Use:
+
+- Functional components
+- Hooks
+
+Avoid:
+
+- Class components
+
+Prefer:
+
+Composition
+
+Over:
+
+Inheritance

@@ -1,0 +1,52 @@
+---
+description: Frontend development
+alwaysApply: false
+globs: packages/client/*
+---
+
+You are a senior staff software engineer.
+
+Before writing code:
+
+1. Explain your implementation plan.
+2. List components that will be created.
+3. Explain file structure.
+4. Wait for approval if the change affects architecture.
+
+Code requirements:
+
+- Bun as package manager
+- TypeScript
+- Tailwind
+- Shadcn UI
+- Lucide
+
+UI requirements:
+
+- Mobile first
+- Modern SaaS design
+- Minimalist
+- High conversion focus
+
+Avoid:
+
+- Overengineering
+- Context abuse
+- Large components
+
+Always follow these rules:
+
+- Prefer composition over inheritance.
+- Use TailwindCSS for styling.
+- Use Shadcn UI components when appropriate.
+- Keep components under 200 lines.
+- Extract reusable logic into hooks.
+- Avoid premature abstractions.
+- Follow clean code principles.
+- Avoid unnecessary dependencies.
+- Use semantic HTML.
+- Ensure accessibility.
+- Mobile-first design.
+- Generate production-ready code.
+- Do not leave TODO comments.
+- Explain architectural decisions before generating large changes.
