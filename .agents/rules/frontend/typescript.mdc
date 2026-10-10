@@ -1,10 +1,72 @@
 ---
-globs: packages/client/*
 alwaysApply: false
 ---
 
 # TypeScript Rules
 
-- Use TypeScript strictly.
-- Never use any.
-- Use Zod for validation.
+## Strictness
+
+- `strict: true` in `tsconfig.json` — always
+- Never `any` — use `unknown` then narrow, or a typed generic
+- Never `as SomeType` unless you can prove it — prefer type guards or Zod parsing
+- No `@ts-ignore`; use `@ts-expect-error` only with a comment explaining why
+
+## Types vs Interfaces
+
+- `interface` for object shapes that may be extended or implemented by a class
+- `type` for unions, intersections, mapped types, and simple aliases
+- Colocate type definitions in `ComponentName.types.ts` next to the source file
+- Export types explicitly; don't re-export everything blindly
+
+## Generics
+
+- Single-letter generics (`T`, `K`, `V`) only when the meaning is obvious from context
+- Otherwise use descriptive names: `TItem`, `TResponse`, `TPayload`
+- Constrain generics when possible: `<T extends Record<string, unknown>>`
+
+## Validation
+
+- Use **Zod** for all runtime validation: API responses, form data, env vars
+- Derive types from schemas — never duplicate manually:
+
+```typescript
+const userSchema = z.object({ id: z.string(), name: z.string() });
+type User = z.infer<typeof userSchema>;
+```
+
+## Discriminated unions over flags
+
+Prefer discriminated unions over multiple boolean flags that imply each other:
+
+```typescript
+// Avoid
+type State = { isLoading: boolean; data?: User; error?: string };
+
+// Prefer
+type State =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: User }
+  | { status: 'error'; message: string };
+```
+
+## Constants over enums
+
+Prefer `as const` objects over `enum` for string unions:
+
+```typescript
+// Avoid
+enum Role { Admin = 'admin', User = 'user' }
+
+// Prefer
+const Role = { Admin: 'admin', User: 'user' } as const;
+type Role = (typeof Role)[keyof typeof Role];
+```
+
+## Avoid
+
+- `Function` type → use explicit signatures: `(id: string) => Promise<User>`
+- `object` or `{}` type → use `Record<string, unknown>` or a specific shape
+- `namespace`
+- Type assertions that widen instead of narrow (`as any`, `as unknown as X`)
+- Redundant type annotations where inference is clear

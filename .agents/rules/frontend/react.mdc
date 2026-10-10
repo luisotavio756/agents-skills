@@ -1,5 +1,4 @@
 ---
-globs: packages/client/*
 alwaysApply: false
 ---
 

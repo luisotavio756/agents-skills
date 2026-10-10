@@ -1,0 +1,47 @@
+---
+description: Frontend development — always-loaded entrypoint and quick reference
+alwaysApply: true
+---
+
+# Frontend Rules
+
+## Stack
+
+| Concern | Tool |
+|---------|------|
+| Package manager | Bun |
+| Language | TypeScript (strict) |
+| Styling | Tailwind CSS |
+| Components | Shadcn UI |
+| Icons | Lucide |
+
+## Design Philosophy
+
+- Mobile-first, minimalist, modern SaaS
+- Conversion-focused — clear hierarchy, minimal friction
+- Composition over inheritance
+- Components under 200 lines; extract reusable logic into hooks
+
+## Sub-rules
+
+Load the relevant file when working in that area:
+
+| Rule | Covers |
+|------|--------|
+| [casing.md](casing.md) | File, component, function, hook, type naming |
+| [files-structure.md](files-structure.md) | Directory layout, component co-location |
+| [typescript.mdc](typescript.mdc) | Strict types, generics, Zod, anti-patterns |
+| [testing.md](testing.md) | Test philosophy; detail lives in the `unit-tests` skill |
+| [accessibility.md](accessibility.md) | ARIA, focus, forms, animation, performance, i18n |
+| [react.mdc](react.mdc) | React patterns: hooks, functional components |
+
+## Always avoid
+
+- `any` in TypeScript
+- Class components
+- `<div>`/`<span>` with click handlers — use `<button>` or `<a>`
+- `outline-none` without a focus-visible replacement
+- `transition: all` — list properties explicitly
+- Inline styles when Tailwind class exists
+- Context for data that belongs in a store
+- `TODO` comments in committed code
