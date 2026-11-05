@@ -1,0 +1,208 @@
+---
+description: Code style — readability, flow, and naming. Applies to all stacks.
+alwaysApply: true
+---
+
+# Code Style
+
+## Meta-rule
+
+**The concise form is the default. Intermediate variables appear when the concise form obscures intent.** Readability is the judge — not brevity, not line count.
+
+## 1. Execution flow
+
+Code should be readable top-to-bottom. The reader must identify quickly: what enters, what operations run, what is returned, what side effects occur.
+
+```ts
+// Good — each step is named and the flow is obvious
+async function executeOrder(orderId: string) {
+  const order = await findOrder(orderId);
+  validateOrder(order);
+
+  const total = calculateOrderTotal(order);
+  const payment = await chargePayment(order, total);
+
+  return savePaymentResult(order, payment);
+}
+```
+
+## 2. Early returns (guard clauses)
+
+Validate preconditions at the top and return early. This keeps the happy path unindented and easy to follow.
+
+```ts
+async execute(id: string) {
+  const user = await this.userRepository.findById(id);
+  if (!user) throw ErrorsCatalog.Users.NotFound;
+
+  const isEligible = this.checkEligibility(user);
+  if (!isEligible) throw ErrorsCatalog.Users.NotEligible;
+
+  return this.processUser(user);
+}
+```
+
+## 3. Intermediate variables
+
+Use named variables when a step has a meaningful result or when chaining would require the reader to parse multiple operations at once.
+
+```ts
+// Avoid when it hides intent
+return formatUser(normalizeUser(await findUser(userId)));
+
+// Prefer when steps are meaningful
+const user = await findUser(userId);
+const normalizedUser = normalizeUser(user);
+const formattedUser = formatUser(normalizedUser);
+return formattedUser;
+```
+
+Concise chaining is fine when each step is obvious and the chain is short:
+
+```ts
+// OK — three short, obvious steps
+const activeUserNames = users
+  .filter(u => u.isActive)
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map(u => u.name);
+```
+
+## 4. Single responsibility
+
+Each class has one main responsibility. Each method executes one clear task. If a method mixes concerns, extract parts with names that express the intent.
+
+```ts
+// Avoid
+async execute(userId: string) {
+  // fetches, validates, transforms, and sends to multiple systems
+}
+
+// Prefer
+async execute(userId: string) {
+  const user = await this.findUser(userId);
+  const validatedUser = this.validateUser(user);
+  return this.updateUser(validatedUser);
+}
+```
+
+Do not extract tiny methods that add no readability benefit.
+
+## 5. Ternaries
+
+Simple ternary: fine.
+
+```ts
+const label = isActive ? 'Active' : 'Inactive';
+```
+
+**Nested ternary: never.** Extract a function instead. Use multiple `if` statements or `switch (true)` with boolean cases:
+
+```ts
+// Never
+const label = isActive ? 'Active' : isPending ? 'Pending' : 'Inactive';
+
+// Prefer — extracted function
+function resolveLabel(isActive: boolean, isPending: boolean): string {
+  if (isActive) return 'Active';
+  if (isPending) return 'Pending';
+  return 'Inactive';
+}
+
+// Or switch(true) for more complex conditions
+function resolveStatus(score: number, hasErrors: boolean): Status {
+  switch (true) {
+    case hasErrors:
+      return Status.Error;
+    case score >= 90:
+      return Status.Excellent;
+    case score >= 60:
+      return Status.Passing;
+    default:
+      return Status.Failing;
+  }
+}
+```
+
+## 6. Async — prefer concise when readable
+
+Parallel operations: `Promise.all` inline is fine when the calls are short:
+
+```ts
+const [user, orders] = await Promise.all([
+  this.userRepository.findById(id),
+  this.orderRepository.findByUserId(id),
+]);
+```
+
+Use named promises when the calls are long or the intent is not obvious:
+
+```ts
+const userPromise = this.userRepository.findByEmailWithRoles(email);
+const configPromise = this.configService.getForTenant(tenantId);
+const [user, config] = await Promise.all([userPromise, configPromise]);
+```
+
+## 7. Destructuring and spread
+
+Use destructuring when it makes clear which properties are used:
+
+```ts
+const { id, email } = user;
+sendWelcomeEmail(email);
+```
+
+Avoid destructuring in function parameters when there are many properties or the shape is not obvious:
+
+```ts
+// Avoid — the expected shape is hard to see at a glance
+function createReport({ id, name, permissions: { canRead }, settings: { format } }: ReportContext) {}
+
+// Prefer — origin of each value is explicit
+function createReport(context: ReportContext) {
+  const canRead = context.permissions.canRead;
+  const reportFormat = context.settings.format;
+}
+```
+
+Spread: use when the intent is clear. Avoid spreading multiple objects when it hides what data is being passed.
+
+```ts
+// Clear
+const updatedUser = { ...user, email: newEmail };
+
+// Avoid — what is actually in the result?
+execute({ ...context, ...options, ...overrides });
+```
+
+## 8. Comments
+
+Only for non-obvious context: a business rule, a unit, a constraint, a known limitation.
+
+```ts
+// Avoid — the code says this already
+const user = await findUser(userId);
+
+// Good — explains the why
+const sessionTimeoutMs = 15 * 60 * 1000; // 15 minutes — matches IdP session policy
+```
+
+## 9. Constants and naming
+
+- `const` by default; `let` only when reassignment is needed
+- Boolean names: `isX`, `hasX`, `canX`
+- Avoid magic numbers — name them as constants
+- Complete words; no abbreviations except universally known ones (`id`, `url`, `dto`, `ctx`)
+
+## Checklist
+
+```
+- [ ] Each class has one main responsibility
+- [ ] Each method has a clear purpose and an appropriate name
+- [ ] Execution flow reads top-to-bottom
+- [ ] Intermediate variables are used where chaining would obscure intent
+- [ ] No nested ternaries — extracted function with if/switch(true) instead
+- [ ] Comments explain only non-obvious context
+- [ ] const by default; let only when needed
+- [ ] Destructuring and spread make the code clearer, not less clear
+- [ ] Abstractions have a concrete readability or separation benefit
+```
