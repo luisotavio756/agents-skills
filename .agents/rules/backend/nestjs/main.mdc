@@ -1,0 +1,50 @@
+---
+description: NestJS backend — always-loaded entrypoint and quick reference
+alwaysApply: true
+---
+
+# NestJS Backend Rules
+
+## Stack
+
+| Concern | Tool |
+|---------|------|
+| Framework | NestJS |
+| Language | TypeScript (strict, no `any`) |
+| Validation | class-validator + class-transformer |
+| Config | @nestjs/config + Zod for env validation |
+| Testing | Jest + Supertest |
+
+## Layered architecture
+
+```
+Controller → Service → Repository
+```
+
+- **Controller**: route, auth guards, DTO binding, response shaping — no business logic
+- **Service**: business rules, orchestration, error throwing — no DB queries
+- **Repository**: data access only — no business decisions
+- **Core**: global pipes, filters, guards, interceptors
+- **Shared**: utilities and services reused across domain modules
+
+## Sub-rules
+
+| Rule | Covers |
+|------|--------|
+| [architecture.md](architecture.md) | Module layout, layer responsibilities, file structure |
+| [casing.md](casing.md) | Classes, files, DTOs, guards, pipes, interceptors |
+| [dto-validation.md](dto-validation.md) | Input/output DTOs, class-validator, GlobalValidationPipe, env |
+| [error-handling.md](error-handling.md) | ErrorsCatalog, global filter, error taxonomy |
+| [swagger.md](swagger.md) | JSDoc docs, custom response decorators |
+| [testing.md](testing.md) | Unit (services), e2e (controllers), conventions |
+
+## Always avoid
+
+- Business logic in controllers
+- Direct DB access in controllers
+- `any` type
+- Validation logic inside service methods — use DTOs + pipes
+- Returning raw entities from controllers (leaks internal fields)
+- God services — split by entity/responsibility
+- Circular module imports
+- `new SomeService()` — always inject via constructor
